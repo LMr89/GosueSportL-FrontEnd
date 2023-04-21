@@ -1,0 +1,244 @@
+<body>
+  <div class="container">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#producto">Registrar Producto</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#ventas">Registrar Venta</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div id="producto" class="tab-pane fade show active">
+        <div class="container">
+          <h2 style="text-align: center;">
+            <ng-container *ngIf="!registrandoNuevoProducto&& !actualizarTitulo">
+              Productos Registrados
+            </ng-container>
+            <ng-container *ngIf="registrandoNuevoProducto">
+              Registrar Nuevo Producto
+            </ng-container>
+            <ng-container *ngIf="actualizarTitulo">
+              Actualizar Producto
+            </ng-container>
+          </h2>
+          <div *ngIf="!productoSeleccionado && !mostrarFormularioRegistro">
+            <input type="search" [(ngModel)]="nombreProductoBuscado" placeholder="Buscar por nombre..." *ngIf="!productoSeleccionado" (input)="buscarProductoPorNombre()">
+          </div>          
+          <table class="tabla-usuarios" *ngIf="!productoSeleccionado && producto.length && !mostrarFormularioRegistro">
+            <thead>
+              <tr>
+                <th>Nombre del Producto</th>
+                <th>Preveedor</th>
+                <th>Categoria</th>
+                <th>Precio Unitario</th>
+                <th>Stock</th>
+                <th>Imagen</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let producto of (searchResults.length ? searchResults : producto)">
+                <td>{{ producto.nombre }}</td>
+                <td>
+                  {{ producto.idProveedor.nombre }} -
+                  {{ producto.idProveedor.region }} -
+                  {{ producto.idProveedor.paginaWeb }}
+                </td>
+                <td>{{ producto.idCategoria.nombre }}</td>
+                <td>S/{{ producto.precioUnitario }}</td>
+                <td>{{ producto.stock }}</td>
+                <td><img [src]="producto.imgUrl" alt="Imagen del producto"></td>
+                <td>
+                  <button class="btn btn-primary" (click)="mostrarFormularioEditar(producto); actualizarTitulo = true">Editar</button>
+                  <button class="btn btn-primary" (click)="eliminarProducto(producto)">Eliminar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="text-center fixed-bottom mb-3" *ngIf="!productoSeleccionado && !mostrarFormularioRegistro">
+            <button class="btn btn-primary"  style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);"
+            (click)="mostrarFormularioRegistro = true; registrandoNuevoProducto = true;">
+              Registrar Producto
+            </button>
+          </div> 
+
+          <div class="card-body" *ngIf="mostrarFormularioRegistro">
+            <form (ngSubmit)="onSubmit()" #registrationForm="ngForm">
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre del producto:</label>
+                <input type="text" id="nombre" name="nombre" [(ngModel)]="nuevoProducto.nombre" class="form-control" required>
+                <div *ngIf="mostrarErrorNombre" class="error-message">{{ error?.nombre }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="idProveedor" class="form-label">Proveedor:</label>
+                <select id="idProveedor" name="idProveedor" [(ngModel)]="nuevoProducto.idProveedor.idProveedor" class="form-select" required>
+                  <option *ngFor="let proveedor of proveedores" [ngValue]="proveedor.idProveedor">{{proveedor.nombre}}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="idCategoria" class="form-label">Categoria:</label>
+                <select id="idCategoria" name="idCategoria" [(ngModel)]="nuevoProducto.idCategoria.idCategoria" class="form-select" required>
+                  <option *ngFor="let categoria of categorias" [ngValue]="categoria.idCategoria">{{categoria.nombre}}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="precio" class="form-label">Precio Unitario:</label>
+                <input type="text" id="precioUnitario" name="precioUnitario" [(ngModel)]="nuevoProducto.precioUnitario" class="form-control" required>
+                <div *ngIf="mostrarErrorPrecio" class="error-message">{{ error?.precioUnitario }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="stock" class="form-label">Stock:</label>
+                <input type="text" id="stock" name="stock" [(ngModel)]="nuevoProducto.stock" class="form-control" required>
+                <div *ngIf="mostrarErrorStock" class="error-message">{{ error?.stock }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="imgUrl" class="form-label">Imagen (URL):</label>
+                <input type="text" id="imgUrl" name="imgUrl" [(ngModel)]="nuevoProducto.imgUrl" class="form-control" required>
+                <div *ngIf="mostrarErrorImg" class="error-message">{{ error?.imgUrl }}</div>
+              </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary" >Registrar</button>
+                <button type="button" class="btn btn-secondary" (click)="mostrarFormularioRegistro = false; registrandoNuevoProducto = false;">Cancelar </button>
+              </div>
+              <div *ngIf="registroExitoso" class="mt-3">
+                <p class="text-center text-success">¡Registro exitoso!</p>
+              </div>
+            </form>
+          </div>
+
+          <div class="formulario-editar" *ngIf="productoSeleccionado" >
+            <form class="card p-4">
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre del Producto:</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" [(ngModel)]="productoSeleccionado.nombre" required>
+                <div *ngIf="mostrarErrorNombre" class="error-message">{{ error?.nombre }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="proveedor" class="form-label">Proveedor:</label>
+                <select id="proveedor" name="proveedor" class="form-control" [(ngModel)]="productoSeleccionado.idProveedor.idProveedor">
+                  <option *ngFor="let proveedor of proveedores" [value]="proveedor.idProveedor">{{ proveedor.nombre }}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="categoria" class="form-label">Categoría:</label>
+                <select id="categoria" name="categoria" class="form-control" [(ngModel)]="productoSeleccionado.idCategoria.idCategoria">
+                  <option *ngFor="let categorias of categorias" [value]="categorias.idCategoria">{{ categorias.nombre }}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="precio" class="form-label">Precio Unitario:</label>
+                <input type="text" id="precio" name="precio" class="form-control" [(ngModel)]="productoSeleccionado.precioUnitario" required>
+                <div *ngIf="mostrarErrorPrecio" class="error-message">{{ error?.precioUnitario }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="stock" class="form-label">Stock:</label>
+                <input type="text" id="stock" name="stock" class="form-control" [(ngModel)]="productoSeleccionado.stock" required>
+                <div *ngIf="mostrarErrorStock" class="error-message">{{ error?.stock }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="imgUrl" class="form-label">Imagen (URL):</label>
+                <input type="text" id="imgUrl" name="imgUrl" [(ngModel)]="productoSeleccionado.imgUrl" class="form-control" required>
+                <div *ngIf="mostrarErrorImg" class="error-message">{{ error?.imgUrl }}</div>
+              </div>
+              <div class="text-center">
+                <button type="submit" (click)="actualizarProducto()" class="btn btn-primary" >Guardar cambios</button>
+                <button type="button" class="btn btn-secondary" (click)="onCancelar(); actualizarTitulo = false;">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div id="ventas" class="tab-pane fade">
+        <div class="container">
+          <h2 style="text-align: center;">
+            {{registrandoNuevaVenta ? 'Registrar Nueva Venta' : (mostrarTicketVenta ? 'Ticket de Venta: ' : 'Ventas Registradas')}}
+          </h2>                   
+          <table class="tabla-usuarios" *ngIf="ventas.length && !mostrarFormularioRegistroVenta && !mostrarTicketVenta">
+            <thead>
+              <tr>
+                <th>Id de Venta</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>IGV</th>
+                <th>Total</th>
+                <th>Detalle</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let venta of ventas">
+                <td>{{ venta.idVenta }}</td>
+                <td>{{ venta.clienteNombre }}</td>
+                <td>{{ convertirFecha(venta.fecha) | date:'dd/MM/yyyy' }}</td>
+                <td>{{ venta.igv.toFixed(2) }}</td>
+                <td>S/.{{ venta.total }}</td>
+                <td>
+                  <div *ngFor="let detalle of venta.detalles">
+                    Producto: {{ detalle.idProducto.nombre }} -
+                    Cantidad: {{ detalle.cantidad }} 
+                  </div>
+                </td>
+                <td>
+                  <button class="btn btn-primary" (click)="eliminarVenta(venta)">Anular</button>
+                  <button class="btn btn-primary" (click)="mostrarTicketVenta = true; generarTicketVenta(venta.idVenta)">Ticket</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="text-center fixed-bottom mb-3" *ngIf="!mostrarFormularioRegistroVenta && !mostrarTicketVenta">
+            <button class="btn btn-primary"  style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);"
+            (click)="mostrarFormularioRegistroVenta = true; registrandoNuevaVenta= true;">
+              Registrar Venta
+            </button>
+          </div> 
+
+          <div class="card-body" *ngIf="mostrarFormularioRegistroVenta">
+            <form (ngSubmit)="registrarVenta()" #registrationForm="ngForm">
+              <div class="mb-3">
+                <label for="cliente" class="form-label">Cliente:</label>
+                <select id="cliente" name="cliente" class="form-control" [(ngModel)]="nuevaVenta.idCliente.idCliente">
+                  <option *ngFor="let cliente of clientesBloqueados" [value]="cliente.idCliente">{{ cliente.nombre }} {{ cliente.apellido }}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="usuario" class="form-label">Usuario:</label>
+                <select id="usuario" name="usuario" class="form-control" [(ngModel)]="nuevaVenta.idUsuario.id">
+                  <option *ngFor="let usuario of usuario" [value]="usuario.id">{{ usuario.nomUsuario }}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="producto" class="form-label">Producto:</label>
+                <select id="producto" name="producto" class="form-control" [(ngModel)]="nuevoDetalleVenta.idProducto.idProducto">
+                  <option *ngFor="let producto of producto" [value]="producto.idProducto">{{ producto.nombre }}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="cantidad" class="form-label">Cantidad:</label>
+                <input type="text" id="cantidad" name="cantidad" [(ngModel)]="nuevoDetalleVenta.cantidad" class="form-control" required>
+              </div>
+              <div class="text-center">
+                <button type="button" class="btn btn-primary" (click)="agregarProducto()">Agregar producto</button>
+              </div>                   
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary" >Registrar</button>
+                <button type="button" class="btn btn-secondary" (click)="mostrarFormularioRegistroVenta = false; registrandoNuevaVenta = false;">Cancelar </button>
+              </div>
+              <div *ngIf="registroExitoso" class="mt-3">
+                <p class="text-center text-success">¡Registro exitoso!</p>
+              </div>
+            </form>
+          </div>      
+
+          <div class="card-body" *ngIf="mostrarTicketVenta">
+            <iframe id="ticket-iframe" style="width: 80%; height: 700px;"></iframe>
+            <div class="text-center">
+              <button type="button" class="btn btn-secondary" (click)="mostrarTicketVenta = false">Regresar</button>
+            </div>
+          </div> 
+        </div>
+      </div>
+    </div>
+  </div>
+</body>

@@ -1,0 +1,39 @@
+body {
+  background-image: url('https://img.freepik.com/vector-premium/abstracto-elegante-fondo-blanco-geometrico_41814-336.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  height: 100vh; /* Altura del viewport */
+  margin: 0; /* Eliminar margen por defecto del body */
+  padding: 0; /* Eliminar padding por defecto del body */
+  overflow: hidden; /* Evitar que la imagen se desplace cuando se agregan elementos */
+}
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+body.login-page {
+  background-image: url('https://img.freepik.com/vector-premium/abstracto-elegante-fondo-blanco-geometrico_41814-336.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body.login-page .video-container {
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.menu-container {
+  position: relative; /* asegurarse de que la posición sea relativa */
+  z-index: 2; /* establecer un valor alto para que se muestre por encima del video */
+}
+

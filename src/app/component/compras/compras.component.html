@@ -1,0 +1,243 @@
+<body>
+  <div class="container">
+    <div class="row justify-content-center mt-2">
+      <div>
+        <div class="card-body">
+          <ul class="nav nav-tabs">
+            <li class="nav-item">
+              <a class="nav-link active" data-toggle="tab" href="#proveedor">Proveedor</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#pedidoCompra">Pedido de Compra</a>
+            </li>
+          </ul>
+          <div class="tab-content">   
+            <div id="proveedor" class="tab-pane fade show active">
+              <div class="container">
+                <h2 style="text-align: center;">
+                  <ng-container *ngIf="!registrandoNuevoProveedor && !actualizarTitulo">
+                    Proveedores Registrados
+                  </ng-container>
+                  <ng-container *ngIf="registrandoNuevoProveedor">
+                    Registrar Nuevo Proveedor
+                  </ng-container>
+                  <ng-container *ngIf="actualizarTitulo">
+                    Actualizar Proveedor
+                  </ng-container>
+                </h2>     
+                <div *ngIf="!proveedorSeleccionado && !mostrarRegistroProveedor">
+                  <input type="search" [(ngModel)]="idProveedorBuscado" placeholder="Buscar por ID..." *ngIf="!proveedorSeleccionado" (input)="buscarProveedorPorId()">
+                </div>            
+                <table class="tabla-usuarios" *ngIf="!proveedorSeleccionado && proveedor.length && !mostrarRegistroProveedor">
+                  <thead>
+                    <tr>
+                      <th>Id</th>
+                      <th>Nombre</th>
+                      <th>Nombre de Contacto</th>
+                      <th>Direccion</th>
+                      <th>Region</th>
+                      <th>Telefono</th>
+                      <th>Pagina Web</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let proveedor of (searchResults.length ? searchResults : proveedor)">
+                      <td>{{ proveedor.idProveedor }}</td>
+                      <td>{{ proveedor.nombre }}</td>
+                      <td>{{ proveedor.nomContacto }}</td>
+                      <td>{{ proveedor.direccion }}</td>
+                      <td>{{ proveedor.region }}</td>
+                      <td>{{ proveedor.telefono }}</td>
+                      <td>{{ proveedor.paginaWeb }}</td>
+                      <td>
+                        <button class="btn btn-primary" (click)="mostrarFormularioEditar(proveedor); actualizarTitulo= true;">Editar</button>
+                        <button class="btn btn-primary" (click)="eliminarProveedor(proveedor)">Eliminar</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="text-center fixed-bottom mb-3" *ngIf="!proveedorSeleccionado && !mostrarRegistroProveedor">
+                  <button class="btn btn-primary"  style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);"
+                  (click)="mostrarRegistroProveedor = true; registrandoNuevoProveedor = true">
+                    Registrar Proveedor
+                  </button>
+                </div> 
+
+                <div class="card-body" *ngIf="mostrarRegistroProveedor">
+                  <form (ngSubmit)="onSubmit()" #registrationForm="ngForm">
+                    <div class="mb-3">
+                      <label for="nombre" class="form-label">Nombre del proveedor:</label>
+                      <input type="text" id="nombre" name="nombre" [(ngModel)]="nuevoProveedor.nombre" class="form-control" required>
+                      <div *ngIf="mostrarErrorNombre" class="error-message">{{ error?.nombre }}</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="apellido" class="form-label">Nombre de contacto:</label>
+                      <input type="text" id="nomContacto" name="nomContacto" [(ngModel)]="nuevoProveedor.nomContacto" class="form-control" required>
+                      <div *ngIf="mostrarErrorContacto" class="error-message">{{ error?.nomContacto }}</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="nom_usuario" class="form-label">Dirección:</label>
+                      <input type="text" id="direccion" name="direccion" [(ngModel)]="nuevoProveedor.direccion" class="form-control" required>
+                      <div *ngIf="mostrarErrorDireccion" class="error-message">{{ error?.direccion }}</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="correo" class="form-label">Region:</label>
+                      <input type="text" id="region" name="region" [(ngModel)]="nuevoProveedor.region" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="telefono" class="form-label">Teléfono:</label>
+                      <input type="tel" id="telefono" name="telefono" [(ngModel)]="nuevoProveedor.telefono" class="form-control" required>
+                      <div *ngIf="mostrarErrorTelefono" class="error-message">{{ error?.telefono }}</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="dni" class="form-label">Pagina Web:</label>
+                      <input type="text" id="paginaWeb" name="paginaWeb" [(ngModel)]="nuevoProveedor.paginaWeb" class="form-control" required>
+                      <div *ngIf="mostrarErrorPagina" class="error-message">{{ error?.paginaWeb }}</div>
+                    </div>
+                    <div class="text-center">
+                      <button type="submit" class="btn btn-primary" >Registrar</button>
+                      <button type="button" class="btn btn-secondary" (click)="mostrarRegistroProveedor = false; registrandoNuevoProveedor = false">Cancelar </button>
+                    </div>
+                    <div *ngIf="registroExitoso" class="mt-3">
+                      <p class="text-center text-success">¡Registro exitoso!</p>
+                    </div>
+                  </form>
+                </div>
+
+                <div class="formulario-editar" *ngIf="proveedorSeleccionado" >
+                  <form class="card p-4">
+                    <div class="mb-3">
+                      <label for="nombre" class="form-label">Nombre del proveedor:</label>
+                      <input type="text" id="nombre" name="nombre" class="form-control" [(ngModel)]="proveedorSeleccionado.nombre" required>
+                      <div *ngIf="mostrarErrorNombre" class="error-message">{{ error?.nombre }}</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="nombre" class="form-label">Nombre de contacto:</label>
+                      <input type="text" id="nomContacto" name="nomContacto" class="form-control" [(ngModel)]="proveedorSeleccionado.nomContacto" required>
+                      <div *ngIf="mostrarErrorContacto" class="error-message">{{ error?.nomContacto }}</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="email" class="form-label">Direccion:</label>
+                      <input type="text" id="direccion" name="direccion" class="form-control" [(ngModel)]="proveedorSeleccionado.direccion" required>
+                      <div *ngIf="mostrarErrorDireccion" class="error-message">{{ error?.direccion }}</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="telefono" class="form-label">Region:</label>
+                      <input type="text" id="region" name="region" class="form-control" [(ngModel)]="proveedorSeleccionado.region" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="telefono" class="form-label">Teléfono:</label>
+                      <input type="tel" id="telefono" name="telefono" class="form-control" [(ngModel)]="proveedorSeleccionado.telefono" required>
+                      <div *ngIf="mostrarErrorTelefono" class="error-message">{{ error?.telefono }}</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="nombre" class="form-label">Pagina Web:</label>
+                      <input type="text" id="paginaWeb" name="paginaWeb" class="form-control" [(ngModel)]="proveedorSeleccionado.paginaWeb" required>
+                      <div *ngIf="mostrarErrorPagina" class="error-message">{{ error?.paginaWeb }}</div>
+                    </div>
+                    <div class="text-center">
+                      <button type="submit" (click)="actualizarProveedor()" class="btn btn-primary" >Guardar cambios</button>
+                      <button type="button" class="btn btn-secondary" (click)="onCancelar(); actualizarTitulo = false;">Cancelar</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <div id="pedidoCompra" class="tab-pane fade">
+              <div class="container">
+                <h2 style="text-align: center;">
+                  {{registrandoNuevoPedido ? 'Registrar Nuevo Pedido de Compra' : (mostrarReporteCompra ? 'Pedido de Compra: ' : 'Pedidos Registrados')}}
+                </h2> 
+                <table class="tabla-usuarios" *ngIf="pedido.length && !mostrarFormularioRegistro && !mostrarReporteCompra">
+                  <thead>
+                    <tr>
+                      <th>Id de la Compra</th>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>Precio</th>
+                      <th>Categoria</th>
+                      <th>Comprobante</th>
+                      <th>Fecha de Registro</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let pedido of pedido">
+                      <td>{{ pedido.idCompra }}</td>
+                      <td><img [src]="pedido.idProducto.imgUrl" alt="Imagen del producto"></td>
+                      <td>{{ pedido.cantidad }}</td>
+                      <td>{{ pedido.precio }}</td>
+                      <td>{{ pedido.idCategoria.nombre }}</td>
+                      <td>{{ pedido.tipoComprabante }}</td>
+                      <td>{{ pedido.fechaRegistro | date:'dd/MM/yyyy - HH:mm:ss' }}</td>
+                      <td>
+                        <button class="btn btn-primary" (click)="eliminarPedido(pedido)">Anular Pedido</button>
+                        <button class="btn btn-primary" (click)="mostrarReporteCompra = true; generarReporteCompra(pedido.idCompra)">Ticket</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="text-center fixed-bottom mb-3" *ngIf="!mostrarFormularioRegistro && !mostrarReporteCompra">
+                  <button class="btn btn-primary"  style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);"
+                  (click)="mostrarFormularioRegistro = true; registrandoNuevoPedido= true;">
+                    Nuevo pedido
+                  </button>
+                </div> 
+
+                <div class="card-body" *ngIf="mostrarFormularioRegistro">
+                  <form (ngSubmit)="registrarPedido()" #registrationForm="ngForm">
+                    <div class="mb-3">
+                      <label for="producto" class="form-label">Producto:</label>
+                      <select id="producto" name="producto" class="form-control" [(ngModel)]="nuevoPedido.idProducto.idProducto">
+                        <option *ngFor="let producto of productos" [value]="producto.idProducto">{{ producto.nombre }}</option>
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="cantidad" class="form-label">Cantidad:</label>
+                      <input type="text" id="cantidad" name="cantidad" [(ngModel)]="nuevoPedido.cantidad" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="precio" class="form-label">Precio:</label>
+                      <input type="text" id="precio" name="precio" [(ngModel)]="nuevoPedido.precio" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="categoria" class="form-label">Categoria:</label>
+                      <select id="categoria" name="categoria" class="form-control" [(ngModel)]="nuevoPedido.idCategoria.idCategoria">
+                        <option *ngFor="let categoria of categorias" [value]="categoria.idCategoria">{{ categoria.nombre }}</option>
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="tipoComprabante" class="form-label">Tipo de comprobante:</label>
+                      <select id="tipoComprabante" name="tipoComprabante" [(ngModel)]="nuevoPedido.tipoComprabante" class="form-control" required>
+                        <option value="">Seleccionar tipo de comprobante</option>
+                        <option value="B">Boleta</option>
+                        <option value="F">Factura</option>
+                      </select>
+                    </div>
+                    <div *ngIf="mostrarErrorComprobante" class="error-message">Seleccionar comprobante</div>
+                    <div class="text-center">
+                      <button type="submit" class="btn btn-primary" >Registrar</button>
+                      <button type="button" class="btn btn-secondary" (click)="mostrarFormularioRegistro = false; registrandoNuevoPedido = false;">Cancelar </button>
+                    </div>
+                    <div *ngIf="registroExitoso" class="mt-3">
+                      <p class="text-center text-success">¡Registro exitoso!</p>
+                    </div>
+                  </form>
+                </div> 
+                
+                <div class="card-body" *ngIf="mostrarReporteCompra">
+                  <iframe id="reporte-iframe" style="width: 80%; height: 500px;"></iframe>
+                  <div class="text-center">
+                    <button type="button" class="btn btn-secondary" (click)="mostrarReporteCompra = false">Regresar</button>
+                  </div>
+                </div> 
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>

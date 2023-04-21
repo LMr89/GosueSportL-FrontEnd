@@ -1,0 +1,20 @@
+<div class="menu-container">
+  <div *ngIf="loggedIn">
+    <ul class="menu">
+      <li><a routerLink="/menu">Gosu eSports</a></li>
+      <li><a routerLink="/ventas">Gestión Venta</a></li>
+      <li><a routerLink="/compras">Gestión Compra</a></li>
+      <li><a routerLink="/reservas">Gestión Reserva</a></li>
+      <li><a routerLink="/alquiler">Gestión Alquiler</a></li>
+      <li><a routerLink="/listarUsuarios">Gestión Usuarios</a></li>
+      <li><a routerLink="/menu" (click)="logout()">Cerrar Sesión</a></li>
+    </ul>
+  </div>
+  <div *ngIf="!loggedIn">
+    <ul class="menu">
+      <li><a routerLink="/menu">Gosu eSports</a></li>
+      <li><a routerLink="/login">Iniciar sesión</a></li>
+    </ul>
+  </div>
+</div>
+<router-outlet></router-outlet>

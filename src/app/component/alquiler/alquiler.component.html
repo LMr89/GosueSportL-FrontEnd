@@ -1,0 +1,268 @@
+<body>
+  <div class="container">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#clientes">Registro de Cliente</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#alquileres">Listado de Alquileres</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#ordenadores">Ordenadores en Linea</a>
+      </li>
+    </ul>
+    
+    <div class="tab-content">
+      <div id="clientes" class="tab-pane fade show active">
+        <div class="container">
+          <h2 style="text-align: center;">
+            <ng-container *ngIf="!registrandoNuevoCliente && !actualizarTitulo">
+              Clientes Registrados
+            </ng-container>
+            <ng-container *ngIf="registrandoNuevoCliente">
+              Registrar Nuevo Cliente
+            </ng-container>
+            <ng-container *ngIf="actualizarTitulo">
+              Actualizar Cliente
+            </ng-container>
+          </h2> 
+          <div *ngIf="!clienteSeleccionado && !mostrarFormularioRegistro">
+            <input type="search" [(ngModel)]="dni" placeholder="Buscar por DNI..." *ngIf="!clienteSeleccionado" (input)="buscarClientes()">
+          </div> 
+          <table class="tabla-usuarios" *ngIf="!clienteSeleccionado && cliente.length && !mostrarFormularioRegistro">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>DNI</th>
+                <th>Direccion</th>
+                <th>Telefono</th>
+                <th>Bloqueado</th>
+                <th>Nombre de Usuario</th>
+                <th>Correo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cliente of (searchResults.length ? searchResults : cliente)">
+                <td>{{ cliente.idCliente }}</td>
+                <td>{{ cliente.nombre }}</td>
+                <td>{{ cliente.apellido }}</td>
+                <td>{{ cliente.dni }}</td>
+                <td>{{ cliente.direccion }}</td>
+                <td>{{ cliente.telefono }}</td>
+                <td *ngIf="!cliente.esBloqueado" (click)="sancionarCliente(cliente.idCliente)" style="cursor: pointer; color: black;
+                "title="Click para Blockear al Cliente">
+                <span class="hoverable">No</span></td>
+                <td *ngIf="cliente.esBloqueado" (click)="quitarSancion(cliente.idCliente)" style="cursor: pointer; color: black;
+                "title="Click para Desblockear al Cliente">
+                <span class="hoverable">Si</span></td>
+                <td>{{ cliente.nomUsuario }}</td>
+                <td>{{ cliente.correo }}</td>
+                <td>
+                  <button class="btn btn-primary" (click)="mostrarFormularioEditar(cliente); actualizarTitulo = true;">Editar</button>
+                  <button class="btn btn-primary" (click)="eliminarCliente(cliente)">Eliminar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="text-center fixed-bottom mb-3" *ngIf="!clienteSeleccionado && !mostrarFormularioRegistro">
+            <button class="btn btn-primary"  style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);"
+            (click)="mostrarFormularioRegistro = true; registrandoNuevoCliente = true;">
+              Registrar Cliente
+            </button>
+          </div> 
+  
+          <div class="card-body" *ngIf="mostrarFormularioRegistro">
+            <form (ngSubmit)="onSubmit()" #registrationForm="ngForm">
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" [(ngModel)]="nuevoCliente.nombre" class="form-control" required>
+                <div *ngIf="mostrarErrorNombre" class="error-message">{{ error?.nombre }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="apellido" class="form-label">Apellido</label>
+                <input type="text" id="apellido" name="apellido" [(ngModel)]="nuevoCliente.apellido" class="form-control" required>
+                <div *ngIf="mostrarErrorApellido" class="error-message">{{ error?.apellido }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="dni" class="form-label">DNI</label>
+                <input type="text" id="dni" name="dni" [(ngModel)]="nuevoCliente.dni" class="form-control" required>
+                <div *ngIf="mostrarErrorDni" class="error-message">{{ error?.dni }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="direccion" class="form-label">Direccion:</label>
+                <input type="text" id="direccion" name="direccion" [(ngModel)]="nuevoCliente.direccion" class="form-control" required>
+                <div *ngIf="mostrarErrorDireccion" class="error-message">{{ error?.direccion }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="telefono" class="form-label">Teléfono:</label>
+                <input type="tel" id="telefono" name="telefono" [(ngModel)]="nuevoCliente.telefono" class="form-control" required>
+                <div *ngIf="mostrarErrorTelefono" class="error-message">{{ error?.telefono }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="esBloqueado" class="form-label">¿Está bloqueado el cliente?</label>
+                <select id="esBloqueado" name="esBloqueado" [(ngModel)]="nuevoCliente.esBloqueado" class="form-select" required>
+                  <option value="true">Sí</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="nomUsuario" class="form-label">Nombre de Usuario:</label>
+                <input type="text" id="nomUsuario" name="nomUsuario" [(ngModel)]="nuevoCliente.nomUsuario" class="form-control" required>
+                <div *ngIf="mostrarErrorUsuario" class="error-message">{{ error?.nomUsuario }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="correo" class="form-label">Correo:</label>
+                <input type="email" id="correo" name="correo" [(ngModel)]="nuevoCliente.correo" class="form-control" required>
+                <div *ngIf="mostrarErrorCorreo" class="error-message">{{ error?.correo }}</div>
+              </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary" >Registrar</button>
+                <button type="button" class="btn btn-secondary" (click)="mostrarFormularioRegistro = false; registrandoNuevoCliente = false">Cancelar </button>
+              </div>
+              <div *ngIf="registroExitoso" class="mt-3">
+                <p class="text-center text-success">¡Registro exitoso!</p>
+              </div>
+            </form>
+          </div>
+  
+          <div class="formulario-editar" *ngIf="clienteSeleccionado" >
+            <form class="card p-4">
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" [(ngModel)]="clienteSeleccionado.nombre" required>
+                <div *ngIf="mostrarErrorNombre" class="error-message">{{ error?.nombre }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="apellido" class="form-label">Apellido:</label>
+                <input type="text" id="apellido" name="apellido" class="form-control" [(ngModel)]="clienteSeleccionado.apellido" required>
+                <div *ngIf="mostrarErrorApellido" class="error-message">{{ error?.apellido }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="dni" class="form-label">DNI:</label>
+                <input type="text" id="dni" name="dni" class="form-control" [(ngModel)]="clienteSeleccionado.dni" required>
+                <div *ngIf="mostrarErrorDni" class="error-message">{{ error?.dni }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="direccion" class="form-label">Direccion:</label>
+                <input type="text" id="direccion" name="direccion" class="form-control" [(ngModel)]="clienteSeleccionado.direccion" required>
+                <div *ngIf="mostrarErrorDireccion" class="error-message">{{ error?.direccion }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="telefono" class="form-label">Teléfono:</label>
+                <input type="tel" id="telefono" name="telefono" class="form-control" [(ngModel)]="clienteSeleccionado.telefono" required>
+                <div *ngIf="mostrarErrorTelefono" class="error-message">{{ error?.telefono }}</div>
+              </div>
+              <div class="mb-3 form-check">
+                <input type="checkbox" id="esBloqueado" name="esBloqueado" class="form-check-input" [(ngModel)]="clienteSeleccionado.esBloqueado" (change)="manejarCambioBloqueo()">
+                <label for="esBloqueado" class="form-check-label">
+                  {{ estaBloqueado ? 'Bloquear Cliente' : 'Desbloquear Cliente' }}
+                </label>
+              </div>
+              <div class="mb-3">
+                <label for="nomUsuario" class="form-label">Nombre de Usuario</label>
+                <input type="text" id="nomUsuario" name="nomUsuario" class="form-control" [(ngModel)]="clienteSeleccionado.nomUsuario" required>
+                <div *ngIf="mostrarErrorUsuario" class="error-message">{{ error?.nomUsuario }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="correo" class="form-label">Correo</label>
+                <input type="email" id="correo" name="correo" class="form-control" [(ngModel)]="clienteSeleccionado.correo" required>
+                <div *ngIf="mostrarErrorCorreo" class="error-message">{{ error?.correo }}</div>
+              </div>
+              <div class="text-center">
+                <button type="submit" (click)="actualizarCliente()" class="btn btn-primary" >Guardar cambios</button>
+                <button type="button" class="btn btn-secondary" (click)="onCancelar(); actualizarTitulo = false;">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+  
+      <div id="alquileres" class="tab-pane fade">
+        <div class="container">
+          <h2 style="text-align: center;">{{registrandoNuevoAlquiler? 'Nuevo Alquiler' : 'Alquileres Registrados'}}</h2>
+          <table class="tabla-alquiler" *ngIf="alquiler.length && !mostrarFormularioRegistroAlquileres && !errorAlquileres">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Cliente</th>
+                <th>Ordenador</th>
+                <th>Fecha</th>
+                <th>Tiempo</th>
+                <th>Monto</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let alquiler of alquiler">
+                <td>{{ alquiler.idAlquiler }}</td>
+                <td>{{ alquiler.idCliente }}</td>
+                <td>{{ alquiler.idOrdenador }}</td>
+                <td>{{ alquiler.fecha | date:'HH:mm:ss dd/MM/yyyy':'UTC' }}</td>
+                <td>{{ alquiler.tiempo }}</td>
+                <td>S/{{ alquiler.monto }}</td>
+                <td>
+                  <button class="btn btn-primary" (click)="eliminarAlquiler(alquiler)">Anular</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="!mostrarFormularioRegistroAlquileres && errorAlquileres" class="error-mensaje">{{ errorAlquileres }}</div>
+          <div class="text-center fixed-bottom mb-3" *ngIf="!mostrarFormularioRegistroAlquileres">
+            <button class="btn btn-primary"  style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);"
+            (click)="mostrarFormularioRegistroAlquileres = true; registrandoNuevoAlquiler = true;">
+              Registrar Alquiler
+            </button>
+          </div> 
+  
+          <div class="card-body" *ngIf="mostrarFormularioRegistroAlquileres">
+            <form (ngSubmit)="registrarAlquiler()" #registrationForm="ngForm">
+              <div class="mb-3">
+                <label for="cliente" class="form-label">Cliente:</label>
+                <select id="cliente" name="cliente" class="form-control" [(ngModel)]="nuevoAlquiler.idCliente.idCliente">
+                  <option *ngFor="let cliente of clientesBloqueados" [value]="cliente.idCliente">{{ cliente.nombre }} {{ cliente.apellido }}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="idProveedor" class="form-label">Ordenador:</label>
+                <select id="idProveedor" name="idProveedor" [(ngModel)]="nuevoAlquiler.idOrdenador.idOrdenador" class="form-select" required>
+                  <option *ngFor="let ordenador of ordenadores" [ngValue]="ordenador.idOrdenador">{{ordenador.nomDispositivo}} - {{ordenador.caracteristicas}}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="tiempo" class="form-label">Tiempo</label>
+                <input type="text" id="tiempo" name="tiempo" [(ngModel)]="nuevoAlquiler.tiempo" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label for="monto" class="form-label">Monto:</label>
+                <input type="text" id="monto" name="monto" [(ngModel)]="nuevoAlquiler.monto" class="form-control" required>
+                <div *ngIf="mostrarErrorMonto" class="error-message">{{ error?.monto }}</div>
+              </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary" >Registrar</button>
+                <button type="button" class="btn btn-secondary" (click)="mostrarFormularioRegistroAlquileres = false; registrandoNuevoAlquiler = false">Cancelar </button>
+              </div>
+              <div *ngIf="registroExitoso" class="mt-3">
+                <p class="text-center text-success">¡Registro exitoso!</p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+  
+      <div id="ordenadores" class="tab-pane fade">
+        <div class="container">
+          <h2 style="text-align: center;">Ordenadores en Línea</h2>
+          <div class="container" *ngIf="!errorOrdenadores">
+            <div *ngFor="let ordenador of ordenadoresLinea" class="butaca" [class.ocupado]="ordenador.ocupado" [class.disponible]="!ordenador.ocupado">
+              <div class="butaca-numero">{{ ordenador.numOrdenador }}</div>
+            </div>
+          </div>
+          <div *ngIf="errorOrdenadores" class="error-mensaje">{{ errorOrdenadores }}</div>
+        </div>        
+      </div>
+    </div>
+  </div>
+</body>

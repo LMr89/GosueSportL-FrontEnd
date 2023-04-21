@@ -1,0 +1,89 @@
+<body>
+  <div class="container">
+    <h2 style="text-align: center;">{{actualizarInfo ? 'Actualizar Usuario' : 'Usuarios Registrados'}}</h2>
+    <div>
+      <input type="search" [(ngModel)]="idUsuarioBuscado" placeholder="Buscar por ID..." *ngIf="!usuarioSeleccionado" (input)="buscarUsuarioPorId()">
+    </div>  
+    <table class="tabla-usuarios" *ngIf="!usuarioSeleccionado && users.length">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Nombre de Usuario</th>
+          <th>Correo electrónico</th>
+          <th>Telefono</th>
+          <th>Dni</th>
+          <th>Direccion</th>
+          <th>Rol de Usuario</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of (searchResults.length ? searchResults : users)">
+          <td>{{ usuario.id }}</td>
+          <td>{{ usuario.nombre }}</td>
+          <td>{{ usuario.apellido }}</td>
+          <td>{{ usuario.nomUsuario }}</td>
+          <td>{{ usuario.correo }}</td>
+          <td>{{ usuario.telefono }}</td>
+          <td>{{ usuario.dni }}</td>
+          <td>{{ usuario.direccion }}</td>
+          <td>{{ usuario.roles[0].rolNombre }}</td>
+          <td>
+            <button class="btn btn-primary" (click)="mostrarFormularioEditar(usuario); actualizarInfo = true;">Editar</button>
+            <button class="btn btn-primary" (click)="eliminarUsuario(usuario)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="text-center fixed-bottom mb-3" *ngIf="!usuarioSeleccionado">
+      <button routerLink="/registros"  class="btn btn-primary" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">
+        Registrar Usuario
+      </button>
+    </div> 
+  
+    <div class="formulario-editar" *ngIf="usuarioSeleccionado" >
+      <form class="card p-4">
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombres:</label>
+          <input type="text" id="nombre" name="nombre" class="form-control" [(ngModel)]="usuarioSeleccionado.nombre" required>
+          <div *ngIf="mostrarErrorNombre" class="error-message">{{ error?.nombre }}</div>
+        </div>
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Apellidos:</label>
+          <input type="text" id="apellido" name="apellido" class="form-control" [(ngModel)]="usuarioSeleccionado.apellido" required>
+          <div *ngIf="mostrarErrorApellido" class="error-message">{{ error?.apellido }}</div>
+        </div>
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre de Usuario:</label>
+          <input type="text" id="nomUsuario" name="nomUsuario" class="form-control" [(ngModel)]="usuarioSeleccionado.nomUsuario" required>
+          <div *ngIf="mostrarErrorUsuario" class="error-message">{{ error?.nomUsuario }}</div>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Correo electrónico:</label>
+          <input type="email" id="email" name="email" class="form-control" [(ngModel)]="usuarioSeleccionado.correo" required>
+        </div>
+        <div class="mb-3">
+          <label for="telefono" class="form-label">Teléfono:</label>
+          <input type="tel" id="telefono" name="telefono" class="form-control" [(ngModel)]="usuarioSeleccionado.telefono" required>
+          <div *ngIf="mostrarErrorTelefono" class="error-message">{{ error?.telefono }}</div>
+        </div>
+        <div class="mb-3">
+          <label for="dni" class="form-label">DNI:</label>
+          <input type="text" id="dni" name="dni" class="form-control" [(ngModel)]="usuarioSeleccionado.dni" required>
+          <div *ngIf="mostrarErrorDni" class="error-message">{{ error?.dni }}</div>
+        </div>
+        <div class="mb-3">
+          <label for="direccion" class="form-label">Dirección:</label>
+          <input type="text" id="direccion" name="direccion" class="form-control" [(ngModel)]="usuarioSeleccionado.direccion" required>
+          <div *ngIf="mostrarErrorDireccion" class="error-message">{{ error?.direccion }}</div>
+        </div>
+        <div class="text-center">
+          <button type="submit" (click)="actualizarUsuario()" class="btn btn-primary" >Guardar cambios</button>
+          <button type="button" class="btn btn-secondary" (click)="onCancelar(); actualizarInfo = false;">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>

@@ -1,0 +1,267 @@
+<body>
+  <div class="container">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#reservas">Reservas</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#ordenadores">Ordenadores</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#ordenadoresMantenimiento">Mantenimiento</a>
+      </li>
+    </ul>
+    
+    <div class="tab-content">
+      <div id="reservas" class="tab-pane fade show active">
+        <div class="container">
+          <h2 style="text-align: center;">
+            <ng-container *ngIf="!registrandoNuevaReserva && !actualizarTituloReserva">
+              Reservas Registradas
+            </ng-container>
+            <ng-container *ngIf="registrandoNuevaReserva">
+              Registrar Nueva Reserva
+            </ng-container>
+            <ng-container *ngIf="actualizarTituloReserva">
+              Actualizar Reserva
+            </ng-container>
+          </h2> 
+          <table class="tabla-usuarios" *ngIf="!reservaSeleccionada && reservas.length && !mostrarRegistroReservas">
+            <thead>
+              <tr>
+                <th>Fecha de Inicio</th>
+                <th>Fecha de Fin</th>
+                <th>Tiempo</th>
+                <th>Cliente</th>
+                <th>Usuario</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let reserva of reservas">
+                <td>{{ reserva.fechaInicio | date:'dd/MM/yyyy - HH:mm:ss':'UTC'}}</td>
+                <td>{{ reserva.fechaFin | date:'dd/MM/yyyy - HH:mm:ss':'UTC' }}</td>
+                <td>{{ reserva.tiempo }} min</td>
+                <td>{{ reserva.cliente }}</td>
+                <td>{{ reserva.usuario }}</td>
+                <td>S/.{{ reserva.monto }}</td>
+                <td>{{ reserva.estado ? 'Activo' : 'Desactivo' }}</td>
+                <td>
+                  <button *ngIf="reserva.estado" class="btn btn-primary" (click)="eliminarReserva(reserva)">Cancelar Reserva</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="!reservaSeleccionada && !mostrarRegistroReservas && mostrarMensaje" class="error-mensaje">{{ error?.errores }}</div>
+          <div class="text-center fixed-bottom mb-3" *ngIf="!reservaSeleccionada && !mostrarRegistroReservas">
+            <button class="btn btn-primary"  style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);"
+            (click)="mostrarRegistroReservas = true; registrandoNuevaReserva = true;">
+              Registrar Reserva
+            </button>
+          </div>
+  
+          <div class="card-body" *ngIf="mostrarRegistroReservas">
+            <form (ngSubmit)="registrarReserva()" #registrationFormReserva="ngForm">
+              <div class="mb-3">
+                <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
+                <input type="datetime-local" id="fechaInicio" name="fechaInicio" [(ngModel)]="nuevaReserva.fechaInicio" class="form-control" required>
+                <div *ngIf="mostrarErrorFecha" class="error-message">{{ error?.fechaInicio }}</div>
+              </div>            
+              <div class="mb-3">
+                <label for="tiempo" class="form-label">Tiempo</label>
+                <input type="text" id="tiempo" name="tiempo" [(ngModel)]="nuevaReserva.tiempo" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label for="idProveedor" class="form-label">Ordenador:</label>
+                <select id="idProveedor" name="idProveedor" [(ngModel)]="nuevaReserva.idOrdenador.idOrdenador" class="form-select" required>
+                  <option *ngFor="let ordenador of ordenadores" [ngValue]="ordenador.idOrdenador">{{ordenador.nomDispositivo}} - {{ordenador.caracteristicas}}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="cliente" class="form-label">Cliente:</label>
+                <select id="cliente" name="cliente" [(ngModel)]="nuevaReserva.cliente.idCliente" class="form-select" required>
+                  <option *ngFor="let cliente of clientes" [ngValue]="cliente.idCliente">{{cliente.nombre}} {{cliente.apellido}}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="idUsuario" class="form-label">Usuario:</label>
+                <select id="idUsuario" name="idUsuario" [(ngModel)]="nuevaReserva.idUsuario.id" class="form-select" required>
+                  <option *ngFor="let usuario of usuarios" [ngValue]="usuario.id">{{usuario.nombre}} {{usuario.apellido}}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="monto" class="form-label">Monto:</label>
+                <input type="tex" id="monto" name="monto" [(ngModel)]="nuevaReserva.monto" class="form-control" required>
+              </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary" >Registrar</button>
+                <button type="button" class="btn btn-secondary" (click)="mostrarRegistroReservas = false; registrandoNuevaReserva = false;">Cancelar </button>
+              </div>
+              <div *ngIf="registroExitoso" class="mt-3">
+                <p class="text-center text-success">¡Registro exitoso!</p>
+              </div>
+            </form>
+          </div>  
+        </div>
+      </div>
+  
+      <div id="ordenadores" class="tab-pane fade">
+        <div class="container">
+          <h2 style="text-align: center;">
+            <ng-container *ngIf="!registrandoNuevoOrdenador && !actualizarTituloOrdenador">
+              Ordenadores Registrados
+            </ng-container>
+            <ng-container *ngIf="registrandoNuevoOrdenador">
+              Registrar Nuevo Ordenador
+            </ng-container>
+            <ng-container *ngIf="actualizarTituloOrdenador">
+              Actualizar Ordenador
+            </ng-container>
+          </h2> 
+          <table class="tabla-usuarios" *ngIf="!ordenadorSeleccionado && ordenadores.length && !mostrarRegistroOrdenador">
+            <thead>
+              <tr>
+                <th>Nombre del Ordenador</th>
+                <th>Caracteristicas</th>
+                <th>IP del Ordenador</th>
+                <th>Direccion MAC</th>
+                <th>Numero de Ordenador</th>
+                <th>Mantenimiento</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let ordenador of (searchResults.length ? searchResults : ordenadores)">
+                <td>{{ ordenador.nomDispositivo }}</td>
+                <td>{{ ordenador.caracteristicas }}</td>
+                <td>{{ ordenador.ipOrdenador }}</td>
+                <td>{{ ordenador.direccionMac }}</td>
+                <td>{{ ordenador.numOrdenador }}</td>
+                <td (click)="ponerOrdenadorMantenimiento(ordenador.idOrdenador)" style="cursor: pointer; color: black;
+                  "title="Haga clic para cambiar el estado de mantenimiento del ordenador">
+                  <span class="hoverable">
+                      {{ ordenador.mantenimiento ? 'En Mantenimiento' : 'Fuera de Mantenimiento' }}
+                  </span>
+                </td>                           
+                <td>{{ ordenador.estado ? 'Activo' : 'Desactivo' }}</td>
+                <td>
+                  <button class="btn btn-primary" (click)="mostrarEditarOrdenador(ordenador); actualizarTituloOrdenador = true;">Editar</button>
+                  <button class="btn btn-primary" (click)="eliminarOrdenador(ordenador)">Eliminar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="text-center fixed-bottom mb-3" *ngIf="!ordenadorSeleccionado && !mostrarRegistroOrdenador">
+            <button class="btn btn-primary"  style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);"
+            (click)="mostrarRegistroOrdenador = true; registrandoNuevoOrdenador = true;">
+              Registrar Ordenador
+            </button>
+          </div> 
+  
+          <div class="card-body" *ngIf="mostrarRegistroOrdenador">
+            <form (ngSubmit)="registrarOrdenador()" #registrationFormOrdenador="ngForm">
+              <div class="mb-3">
+                <label for="nomDispositivo" class="form-label">Nombre del Dispositivo:</label>
+                <input type="text" id="nomDispositivo" name="nomDispositivo" [(ngModel)]="nuevoOrdenador.nomDispositivo" class="form-control" required>
+                <div *ngIf="mostrarErrorNombre" class="error-message">{{ error?.nomDispositivo }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="caracteristicas" class="form-label">Características</label>
+                <textarea id="caracteristicas" name="caracteristicas" [(ngModel)]="nuevoOrdenador.caracteristicas" class="form-control" rows="3" cols="40" required></textarea>
+                <div *ngIf="mostrarErrorCaracteristicas" class="error-message">{{ error?.caracteristicas }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="ipOrdenador" class="form-label">Ip del Ordenador:</label>
+                <input type="text" id="ipOrdenador" name="ipOrdenador" [(ngModel)]="nuevoOrdenador.ipOrdenador" class="form-control" required>
+                <div *ngIf="mostrarErrorIp" class="error-message">{{ error?.ipOrdenador }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="direccionMac" class="form-label">Direccion Mac del Ordenador:</label>
+                <input type="text" id="direccionMac" name="direccionMac" [(ngModel)]="nuevoOrdenador.direccionMac" class="form-control" required>
+                <div *ngIf="mostrarErrorDireccionMac" class="error-message">{{ error?.direccionMac }}</div>
+              </div>
+              <div class="mb-3">
+                <label for="numOrdenador" class="form-label">Numero de Ordenador:</label>
+                <input type="tel" id="numOrdenador" name="numOrdenador" [(ngModel)]="nuevoOrdenador.numOrdenador" class="form-control" required>
+              </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary" >Registrar</button>
+                <button type="button" class="btn btn-secondary" (click)="mostrarRegistroOrdenador = false; registrandoNuevoOrdenador = false;">Cancelar </button>
+              </div>
+              <div *ngIf="registroExitoso" class="mt-3">
+                <p class="text-center text-success">¡Registro exitoso!</p>
+              </div>
+            </form>
+          </div>
+  
+          <div class="formulario-editar" *ngIf="ordenadorSeleccionado" >
+            <form class="card p-4">
+              <div class="mb-3">
+                <label for="nomDispositivo" class="form-label">Nombre del Dispositivo:</label>
+                <input type="text" id="nomDispositivo" name="nomDispositivo" class="form-control" [(ngModel)]="ordenadorSeleccionado.nomDispositivo" required>
+              </div>
+              <div class="mb-3">
+                <label for="caracteristicas" class="form-label">Caracteristicas:</label>
+                <textarea id="caracteristicas" name="caracteristicas" class="form-control" [(ngModel)]="ordenadorSeleccionado.caracteristicas" rows="3" cols="40" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="ipOrdenador" class="form-label">Ip del Ordenador:</label>
+                <input type="text" id="ipOrdenador" name="ipOrdenador" class="form-control" [(ngModel)]="ordenadorSeleccionado.ipOrdenador" required>
+              </div>
+              <div class="mb-3">
+                <label for="direccionMac" class="form-label">Direccion Mac:</label>
+                <input type="text" id="direccionMac" name="direccionMac" class="form-control" [(ngModel)]="ordenadorSeleccionado.direccionMac" required>
+              </div>
+              <div class="mb-3">
+                <label for="numOrdenador" class="form-label">Numero de Ordenador:</label>
+                <input type="text" id="numOrdenador" name="numOrdenador" class="form-control" [(ngModel)]="ordenadorSeleccionado.numOrdenador" required>
+              </div>
+              <div class="text-center">
+                <button type="submit" (click)="actualizarOrdenadores()" class="btn btn-primary" >Guardar cambios</button>
+                <button type="button" class="btn btn-secondary" (click)="ordenadorSeleccionado = null; actualizarTituloOrdenador = false;">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+  
+      <div id="ordenadoresMantenimiento" class="tab-pane fade">
+        <div class="container">
+          <h2 style="text-align: center;">Ordenadores en mantenimiento</h2>
+          <table class="tabla-usuarios">
+            <thead>
+              <tr>
+                <th>Nombre del Ordenador</th>
+                <th>Caracteristicas</th>
+                <th>IP del Ordenador</th>
+                <th>Direccion MAC</th>
+                <th>Numero de Ordenador</th>
+                <th>Mantenimiento</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let mantenimiento of (searchResults.length ? searchResults : mantenimiento)">
+                <td>{{ mantenimiento.nomDispositivo }}</td>
+                <td>{{ mantenimiento.caracteristicas }}</td>
+                <td>{{ mantenimiento.ipOrdenador }}</td>
+                <td>{{ mantenimiento.direccionMac }}</td>
+                <td>{{ mantenimiento.numOrdenador }}</td>
+                <td (click)="ponerOrdenadorFueraMantenimiento(mantenimiento.idOrdenador)" style="cursor: pointer; color: black;
+                  "title="Haga clic para cambiar el estado de mantenimiento del ordenador">
+                  <span class="hoverable">
+                      {{ mantenimiento.mantenimiento ? 'En Mantenimiento' : 'Fuera de Mantenimiento' }}
+                  </span>
+                </td>  
+                <td>{{ mantenimiento.estado ? 'Activo' : 'Desactivo' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>

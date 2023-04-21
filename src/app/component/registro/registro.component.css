@@ -1,0 +1,13 @@
+body {
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+form {
+  margin-bottom: 100px; /* Ajusta la cantidad de margen inferior que necesites */
+}
+
+.error-message {
+  color: red;
+  margin-top: 5px;
+}
